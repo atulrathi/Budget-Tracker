@@ -2,7 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const auth = require("./Routes/auth.route");
 const Expense = require("./Routes/Expence.route");
-const Catogary = require("./Routes/Catogery.route")
+const Catogary = require("./Routes/Catogery.route");
+const Budget = require("./Routes/Budget");
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/auth",auth);
 app.use("/expenses",Expense);
 app.use("catogary",Catogary);
+app.use("/budgets",Budget);
 
 module.exports = app;

@@ -1,7 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const CATEGORIES = ["Food", "Transport", "Rent", "Shopping", "Bills", "Other"];
+const CATEGORIES = [
+  "Rent / Housing",
+  "Utilities",
+  "Groceries",
+  "Dining & Food",
+  "Transportation",
+  "Fuel",
+  "Internet & Mobile",
+  "Subscriptions",
+  "Shopping",
+  "Health & Medical",
+  "Education",
+  "Entertainment",
+  "Travel",
+  "Insurance",
+  "Loan / EMI",
+  "Other",
+];
 
 export default function ExpenseForm({
   editingExpense,
@@ -9,114 +26,160 @@ export default function ExpenseForm({
   addExpense,
   updateExpense,
 }) {
-  const [type, setType] = useState("");
+  const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [note, setNote] = useState("");
+  const [showNote, setShowNote] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (editingExpense) {
-      setType(editingExpense.type);
-      setAmount(editingExpense.amount);
-      setCategory(editingExpense.category);
+      setTitle(editingExpense.type || "");
+      setAmount(editingExpense.amount || "");
+      setCategory(editingExpense.category || "");
+      setNote(editingExpense.note || "");
+      setShowNote(Boolean(editingExpense.note));
     }
   }, [editingExpense]);
 
-  const reset = () => {
-    setType("");
+  const resetForm = () => {
+    setTitle("");
     setAmount("");
     setCategory("");
+    setNote("");
+    setShowNote(false);
+    setError("");
     setEditingExpense(null);
   };
 
-  const save = async () => {
-    if (!type || !amount || !category) {
-      alert("All fields are required");
+  const saveExpense = async () => {
+    if (!title || !amount || !category) {
+      setError("Please fill in all required fields.");
       return;
     }
 
+    if (loading) return;
+    setLoading(true);
+    setError("");
+
     const token = localStorage.getItem("token");
+
+    const payload = {
+      type: title.trim(),
+      amount: Number(amount),
+      category,
+      note: note.trim() || undefined,
+    };
 
     try {
       if (editingExpense) {
         const res = await axios.put(
           `http://localhost:5000/expenses/${editingExpense._id}`,
-          { type, amount: Number(amount), category },
+          payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         updateExpense(res.data);
       } else {
         const res = await axios.post(
           "http://localhost:5000/expenses",
-          { type, amount: Number(amount), category },
+          payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
-        addExpense({
-          ...res.data,
-          type,
-          amount: Number(amount),
-          category,
-          createdAt: res.data.createdAt || new Date().toISOString(),
-        });
+        addExpense(res.data);
       }
-      reset();
+      resetForm();
     } catch {
-      alert("Operation failed");
+      setError("Unable to save expense. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm max-w-md">
-      <h2 className="text-xl font-semibold mb-4">
-        {editingExpense ? "Edit Expense" : "Add Expense"}
-      </h2>
+    <div className="space-y-3">
+      {error && (
+        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+          {error}
+        </div>
+      )}
 
-      <div className="space-y-3">
-        <input
-          placeholder="Expense type (Petrol, Groceries)"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="w-full border px-4 py-2 rounded"
-        />
+      {/* ROW 1: TITLE */}
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Expense title (e.g. Grocery, Petrol)"
+        className="w-full border px-3 py-2 rounded"
+      />
 
+      {/* ROW 2: AMOUNT + CATEGORY */}
+      <div className="grid grid-cols-2 gap-3">
         <input
           type="number"
-          placeholder="Amount (₹)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="w-full border px-4 py-2 rounded"
+          placeholder="Amount (₹)"
+          className="border px-3 py-2 rounded"
         />
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="w-full border px-4 py-2 rounded"
+          className="border px-3 py-2 rounded"
         >
-          <option value="">Select category</option>
+          <option value="">Category</option>
           {CATEGORIES.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
           ))}
         </select>
+      </div>
 
-        <div className="flex gap-3">
+      {/* OPTIONAL NOTE */}
+      {showNote && (
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Optional note"
+          rows={2}
+          className="w-full border px-3 py-2 rounded resize-none"
+        />
+      )}
+
+      {!showNote && (
+        <button
+          type="button"
+          onClick={() => setShowNote(true)}
+          className="text-xs text-blue-600 hover:underline"
+        >
+          + Add a note (optional)
+        </button>
+      )}
+
+      {/* ACTIONS */}
+      <div className="flex gap-3 pt-1">
+        <button
+          onClick={saveExpense}
+          disabled={loading}
+          className={`flex-1 py-2 rounded text-white ${
+            loading
+              ? "bg-blue-400"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {editingExpense ? "Update Expense" : "Add Expense"}
+        </button>
+
+        {editingExpense && (
           <button
-            onClick={save}
-            className="flex-1 bg-blue-600 text-white py-2 rounded"
+            onClick={resetForm}
+            className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
           >
-            {editingExpense ? "Update" : "Add"}
+            Cancel
           </button>
-
-          {editingExpense && (
-            <button
-              onClick={reset}
-              className="flex-1 bg-gray-300 py-2 rounded"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );

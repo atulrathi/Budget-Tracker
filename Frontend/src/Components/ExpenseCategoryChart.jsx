@@ -1,89 +1,139 @@
 import { useMemo } from "react";
-import {
-  ResponsiveContainer,
-  RadialBarChart,
-  RadialBar,
-} from "recharts";
 
-const COLORS = [
-  "#6366F1", // indigo
-  "#22C55E", // green
-  "#F97316", // orange
-  "#EC4899", // pink
-  "#0EA5E9", // sky
-];
+export default function SmartInsights({ expenses }) {
+  const insights = useMemo(() => {
+    if (!expenses || expenses.length === 0) return [];
 
-export default function ExpenseCategoryChart({ expenses }) {
-  const data = useMemo(() => {
-    const map = {};
-    let total = 0;
+    const result = [];
+    const total = expenses.reduce(
+      (sum, e) => sum + Number(e.amount || 0),
+      0
+    );
 
+    /* ================= CATEGORY ANALYSIS ================= */
+    const categoryTotals = {};
     expenses.forEach((e) => {
-      const amount = Number(e.amount || 0);
-      map[e.category] = (map[e.category] || 0) + amount;
-      total += amount;
+      categoryTotals[e.category] =
+        (categoryTotals[e.category] || 0) +
+        Number(e.amount || 0);
     });
 
-    return Object.entries(map).map(
-      ([category, amount], index) => ({
-        name: category,
-        value: Math.round((amount / total) * 100),
-        fill: COLORS[index % COLORS.length],
-      })
+    const sortedCategories = Object.entries(
+      categoryTotals
+    ).sort((a, b) => b[1] - a[1]);
+
+    if (sortedCategories.length > 0) {
+      const [topCategory, topAmount] =
+        sortedCategories[0];
+      const percentage = (
+        (topAmount / total) *
+        100
+      ).toFixed(1);
+
+      result.push({
+        level: "info",
+        title: "Top Spending Area",
+        message: `Most of your spending is concentrated in "${topCategory}", which accounts for ${percentage}% of your total expenses.`,
+        suggestion:
+          "If this category is flexible, consider setting a monthly limit to stay in control.",
+      });
+    }
+
+    /* ================= DAILY SPENDING ================= */
+    const uniqueDays = new Set(
+      expenses.map((e) =>
+        new Date(e.createdAt).toDateString()
+      )
+    ).size;
+
+    const dailyAverage = Math.round(
+      total / Math.max(uniqueDays, 1)
     );
+
+    result.push({
+      level: "neutral",
+      title: "Daily Spending Pattern",
+      message: `On average, you spend around ₹${dailyAverage} per day.`,
+      suggestion:
+        "Tracking daily averages helps you avoid unplanned overspending.",
+    });
+
+    /* ================= RECENT ACTIVITY ================= */
+    const last7DaysExpenses = expenses.filter(
+      (e) =>
+        new Date(e.createdAt) >
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    );
+
+    const last7Total = last7DaysExpenses.reduce(
+      (sum, e) => sum + Number(e.amount || 0),
+      0
+    );
+
+    if (last7Total > dailyAverage * 7 * 1.25) {
+      result.push({
+        level: "warning",
+        title: "Recent Spending Increase",
+        message:
+          "Your spending over the last 7 days is higher than your usual daily pattern.",
+        suggestion:
+          "Review recent transactions to identify any unnecessary or impulsive expenses.",
+      });
+    }
+
+    /* ================= HEALTH CHECK ================= */
+    if (total < 5000 && expenses.length >= 5) {
+      result.push({
+        level: "success",
+        title: "Healthy Spending Behavior",
+        message:
+          "Your overall spending is currently well balanced and under control.",
+        suggestion:
+          "Maintaining this consistency will help you reach your financial goals faster.",
+      });
+    }
+
+    return result;
   }, [expenses]);
 
-  if (data.length === 0) return null;
+  if (insights.length === 0) return null;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm max-w-md">
-      <h2 className="text-lg font-semibold mb-1">
-        Spending Overview
-      </h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Visual summary of category spending
+    <div className="bg-white border rounded-xl p-5 space-y-4">
+      <h3 className="text-sm font-semibold text-gray-900">
+        Smart Insights
+      </h3>
+      <p className="text-xs text-gray-500">
+        Personalized observations based on your recent
+        spending activity.
       </p>
 
-      <div className="w-full h-[260px]">
-        <ResponsiveContainer>
-          <RadialBarChart
-            innerRadius="25%"
-            outerRadius="90%"
-            data={data}
-            startAngle={90}
-            endAngle={-270}
+      <ul className="space-y-3">
+        {insights.map((item, index) => (
+          <li
+            key={index}
+            className={`p-4 rounded-lg border-l-4 ${
+              item.level === "warning"
+                ? "bg-red-50 border-red-500"
+                : item.level === "success"
+                ? "bg-green-50 border-green-500"
+                : item.level === "info"
+                ? "bg-blue-50 border-blue-500"
+                : "bg-gray-50 border-gray-400"
+            }`}
           >
-            <RadialBar
-              minAngle={15}
-              background
-              clockWise
-              dataKey="value"
-              cornerRadius={10}
-            />
-          </RadialBarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Legend */}
-      <div className="mt-4 space-y-2">
-        {data.map((item) => (
-          <div
-            key={item.name}
-            className="flex items-center gap-2 text-sm"
-          >
-            <span
-              className="w-3 h-3 rounded-full"
-              style={{ background: item.fill }}
-            />
-            <span className="flex-1">
-              {item.name}
-            </span>
-            <span className="text-gray-600">
-              {item.value}%
-            </span>
-          </div>
+            <p className="text-sm font-semibold text-gray-800">
+              {item.title}
+            </p>
+            <p className="text-sm text-gray-700 mt-1">
+              {item.message}
+            </p>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 {item.suggestion}
+            </p>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

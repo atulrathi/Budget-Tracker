@@ -1,8 +1,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
+
 import ExpenseForm from "../../Components/ExpenseForm";
 import ExpenseList from "../../Components/ExpenseList";
-import ExpenseCategoryChart from "../../Components/ExpenseCategoryChart";
+import ExpenseCategoryBarChart from "../../Components/ExpenseCategoryChart";
 
 const LIST_LIMIT = 6;
 
@@ -22,20 +23,22 @@ export default function Expenses() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
+
       const res = await axios.get("http://localhost:5000/expenses", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       setExpenses(res.data?.expenses || []);
     } catch (err) {
-      console.error("Fetch error", err);
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= OPTIMISTIC UPDATES ================= */
-  const addExpense = useCallback((newExpense) => {
-    setExpenses((prev) => [newExpense, ...prev]);
+  /* ================= STATE ================= */
+  const addExpense = useCallback((expense) => {
+    setExpenses((prev) => [expense.expense, ...prev]);
   }, []);
 
   const updateExpense = useCallback((updated) => {
@@ -48,7 +51,7 @@ export default function Expenses() {
     setExpenses((prev) => prev.filter((e) => e._id !== id));
   }, []);
 
-  /* ================= DERIVED DATA ================= */
+  /* ================= DERIVED ================= */
   const totalExpense = useMemo(
     () => expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0),
     [expenses]
@@ -79,71 +82,64 @@ export default function Expenses() {
 
   /* ================= UI ================= */
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       {/* HEADER */}
-      <header className="space-y-2">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Expense Management
+      <header>
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Expenses
         </h1>
-        <p className="text-gray-600 max-w-3xl">
-          Record your daily expenses and instantly see how they impact your
-          overall spending. This page helps you stay aware and in control while
-          adding or updating expense entries.
+        <p className="text-sm text-gray-500">
+          Track, analyze, and manage your spending efficiently.
         </p>
       </header>
 
-      {/* MAIN ACTION AREA */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-stretch">
-        {/* LEFT: ACTION PANEL */}
-        <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm p-6 flex flex-col justify-between">
-          <div className="space-y-6">
-            <ExpenseForm
-              editingExpense={editingExpense}
-              setEditingExpense={setEditingExpense}
-              addExpense={addExpense}
-              updateExpense={updateExpense}
-            />
-          </div>
+      {/* KPI BAR */}
+      <section className="flex items-center justify-between bg-white border rounded-xl px-5 py-4">
+        <div>
+          <p className="text-xs text-gray-500">
+            Total Spending
+          </p>
+          <p className="text-2xl font-bold text-red-600">
+            ₹ {totalExpense}
+          </p>
+        </div>
+        <p className="text-xs text-gray-400 max-w-xs text-right">
+          Updated in real time as expenses are added or modified.
+        </p>
+      </section>
 
-          {/* TOTAL SPENDING */}
-          <div className="mt-8 pt-6 border-t">
+      {/* ANALYTICS + FORM */}
+      <section className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* CHART */}
+        <div className="lg:col-span-3 bg-white border rounded-xl p-5">
+          {expenses.length > 0 ? (
+            <ExpenseCategoryBarChart expenses={expenses} />
+          ) : (
             <p className="text-sm text-gray-500">
-              Total Spending
+              Add expenses to see category insights.
             </p>
-            <p className="text-3xl font-bold text-red-600 mt-1">
-              ₹ {totalExpense}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              This amount updates automatically as you add, edit, or remove
-              expenses.
-            </p>
-          </div>
+          )}
         </div>
 
-        {/* RIGHT: VISUAL INSIGHT */}
-        <div className="lg:col-span-2">
-          {expenses.length > 0 ? (
-            <ExpenseCategoryChart expenses={expenses} />
-          ) : (
-            <div className="bg-white p-6 rounded-2xl shadow-sm text-gray-500 h-full flex items-center">
-              Add a few expenses to see a visual breakdown of your spending by
-              category.
-            </div>
-          )}
+        {/* FORM */}
+        <div className="lg:col-span-2 bg-white border rounded-xl p-5">
+          <h3 className="text-sm font-semibold mb-2">
+            Add / Edit Expense
+          </h3>
+          <ExpenseForm
+            editingExpense={editingExpense}
+            setEditingExpense={setEditingExpense}
+            addExpense={addExpense}
+            updateExpense={updateExpense}
+          />
         </div>
       </section>
 
-      {/* EXPENSE HISTORY */}
-      <section className="space-y-4">
-        <div className="max-w-3xl">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Expense History
-          </h2>
-          <p className="text-sm text-gray-600">
-            Browse, search, and manage all previously added expenses. You can
-            edit or delete entries at any time.
-          </p>
-        </div>
+      {/* HISTORY */}
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">
+          Expense History
+        </h2>
 
         <ExpenseList
           expenses={visibleExpenses}
