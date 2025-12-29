@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth",auth);
-app.use("/expense",Expense);
+app.use("/expenses",Expense);
 app.use("catogary",Catogary);
 
 module.exports = app;

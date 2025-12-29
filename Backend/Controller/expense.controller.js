@@ -3,16 +3,18 @@ const Expense = require("../Models/Expense");
 // ➕ Add Expense
 exports.addExpense = async (req, res) => {
   try {
-    const { type, category, amount, note, date } = req.body;
+    const { type, category, amount} = req.body;
+
+    console.log( req.userId,type, category, amount);
 
     const expense = await Expense.create({
       userId: req.userId,
       type,
       category,
       amount,
-      note,
-      date,
     });
+
+    console.log("Expense created:", expense);
 
     res.status(201).json({
       success: true,
