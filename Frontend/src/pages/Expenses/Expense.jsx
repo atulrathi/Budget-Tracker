@@ -47,8 +47,18 @@ export default function Expenses() {
     );
   }, []);
 
-  const deleteExpense = useCallback((id) => {
-    setExpenses((prev) => prev.filter((e) => e._id !== id));
+  const deleteExpense = useCallback(async(id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this expense?"
+    );
+    if (!confirmed) return;
+
+    const token = localStorage.getItem("token");
+    await axios.delete(`http://localhost:5000/expenses/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then(() => {
+      setExpenses((prev) => prev.filter((e) => e._id !== id));
+    });
   }, []);
 
   /* ================= DERIVED ================= */

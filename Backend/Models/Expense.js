@@ -31,12 +31,16 @@ const expenseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
 // Performance indexes
-expenseSchema.index({ userId: 1, date: -1 });
+expenseSchema.index({ userId: 1, deleted: 1, date: -1 });
 expenseSchema.index({ category: 1 });
 
 module.exports = mongoose.model("Expense", expenseSchema);

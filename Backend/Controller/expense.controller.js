@@ -27,7 +27,7 @@ exports.addExpense = async (req, res) => {
 // 📄 Get All Expenses (for logged-in user)
 exports.getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ userId: req.userId }).sort({
+    const expenses = await Expense.find({ userId: req.userId, deleted: false }).sort({
       date: -1,
     });
 
@@ -78,10 +78,10 @@ exports.deleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const expense = await Expense.findOneAndDelete({
+    const expense = await Expense.findOneAndUpdate({
       _id: id,
       userId: req.userId,
-    });
+    }, { deleted: true }, { new: true });
 
     if (!expense) {
       return res.status(404).json({

@@ -183,7 +183,7 @@ export default function Budgets() {
             Budget vs Actual Spending
           </h2>
 
-          <div className="h-[300px]">
+          <div className="h-75  ">
             <ResponsiveContainer>
               <BarChart data={chartData} layout="vertical" barGap={10}>
                 <XAxis type="number" hide />

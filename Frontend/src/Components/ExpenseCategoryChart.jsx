@@ -5,91 +5,144 @@ export default function SmartInsights({ expenses }) {
     if (!expenses || expenses.length === 0) return [];
 
     const result = [];
+
+    /* ================= TOTAL ================= */
     const total = expenses.reduce(
       (sum, e) => sum + Number(e.amount || 0),
       0
     );
 
+    /* ================= DATE RANGE ================= */
+    const dates = expenses.map(e => new Date(e.createdAt));
+    const firstDate = new Date(Math.min(...dates));
+    const lastDate = new Date(Math.max(...dates));
+
+    const calendarDays =
+      Math.ceil(
+        (lastDate - firstDate) / (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    /* ================= DAILY AVERAGES ================= */
+    const spendingDays = new Set(
+      expenses.map(e =>
+        new Date(e.createdAt).toDateString()
+      )
+    ).size;
+
+    const calendarDailyAvg = Math.round(
+      total / Math.max(calendarDays, 1)
+    );
+
+    const activeDailyAvg = Math.round(
+      total / Math.max(spendingDays, 1)
+    );
+
+    result.push({
+      level: "info",
+      title: "Daily Spending Overview",
+      message: `You spend about ₹${calendarDailyAvg} per day on average across this period. On days you actually spend money, the average rises to ₹${activeDailyAvg}.`,
+      suggestion:
+        "Keeping an eye on non-spending days helps build stronger saving habits.",
+    });
+
     /* ================= CATEGORY ANALYSIS ================= */
     const categoryTotals = {};
-    expenses.forEach((e) => {
+    expenses.forEach(e => {
       categoryTotals[e.category] =
         (categoryTotals[e.category] || 0) +
         Number(e.amount || 0);
     });
 
-    const sortedCategories = Object.entries(
-      categoryTotals
-    ).sort((a, b) => b[1] - a[1]);
+    const sortedCategories = Object.entries(categoryTotals).sort(
+      (a, b) => b[1] - a[1]
+    );
 
     if (sortedCategories.length > 0) {
-      const [topCategory, topAmount] =
-        sortedCategories[0];
-      const percentage = (
-        (topAmount / total) *
-        100
-      ).toFixed(1);
+      const [topCategory, topAmount] = sortedCategories[0];
+      const percent = ((topAmount / total) * 100).toFixed(1);
 
       result.push({
-        level: "info",
-        title: "Top Spending Area",
-        message: `Most of your spending is concentrated in "${topCategory}", which accounts for ${percentage}% of your total expenses.`,
+        level: percent > 50 ? "warning" : "info",
+        title: "Top Spending Category",
+        message: `"${topCategory}" accounts for ${percent}% of your total expenses.`,
         suggestion:
-          "If this category is flexible, consider setting a monthly limit to stay in control.",
+          percent > 50
+            ? "This category dominates your spending. Consider setting a limit or reviewing alternatives."
+            : "Your category distribution looks reasonably balanced.",
       });
     }
 
-    /* ================= DAILY SPENDING ================= */
-    const uniqueDays = new Set(
-      expenses.map((e) =>
-        new Date(e.createdAt).toDateString()
-      )
-    ).size;
+    /* ================= RECENT TREND ================= */
+    const now = Date.now();
 
-    const dailyAverage = Math.round(
-      total / Math.max(uniqueDays, 1)
+    const last7Days = expenses.filter(
+      e => new Date(e.createdAt) > new Date(now - 7 * 86400000)
     );
 
-    result.push({
-      level: "neutral",
-      title: "Daily Spending Pattern",
-      message: `On average, you spend around ₹${dailyAverage} per day.`,
-      suggestion:
-        "Tracking daily averages helps you avoid unplanned overspending.",
-    });
-
-    /* ================= RECENT ACTIVITY ================= */
-    const last7DaysExpenses = expenses.filter(
-      (e) =>
-        new Date(e.createdAt) >
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const prev7Days = expenses.filter(
+      e =>
+        new Date(e.createdAt) <= new Date(now - 7 * 86400000) &&
+        new Date(e.createdAt) > new Date(now - 14 * 86400000)
     );
 
-    const last7Total = last7DaysExpenses.reduce(
+    const last7Total = last7Days.reduce(
       (sum, e) => sum + Number(e.amount || 0),
       0
     );
 
-    if (last7Total > dailyAverage * 7 * 1.25) {
+    const prev7Total = prev7Days.reduce(
+      (sum, e) => sum + Number(e.amount || 0),
+      0
+    );
+
+    if (prev7Total > 0) {
+      const changePercent = (
+        ((last7Total - prev7Total) / prev7Total) *
+        100
+      ).toFixed(1);
+
       result.push({
-        level: "warning",
-        title: "Recent Spending Increase",
+        level:
+          changePercent > 20
+            ? "warning"
+            : changePercent < -20
+            ? "success"
+            : "neutral",
+        title: "Spending Trend",
         message:
-          "Your spending over the last 7 days is higher than your usual daily pattern.",
+          changePercent > 0
+            ? `Your spending increased by ${changePercent}% compared to the previous week.`
+            : `Good job! Your spending dropped by ${Math.abs(
+                changePercent
+              )}% compared to last week.`,
         suggestion:
-          "Review recent transactions to identify any unnecessary or impulsive expenses.",
+          changePercent > 20
+            ? "Review recent purchases to avoid budget drift."
+            : "Maintaining this trend supports long-term savings.",
       });
     }
 
-    /* ================= HEALTH CHECK ================= */
+    /* ================= OVERSPENDING SIGNAL ================= */
+    if (activeDailyAvg > calendarDailyAvg * 1.8) {
+      result.push({
+        level: "warning",
+        title: "Spending Intensity Alert",
+        message:
+          "Your spending days are significantly heavier than your overall average.",
+        suggestion:
+          "Try spreading expenses more evenly to reduce financial pressure.",
+      });
+    }
+
+    /* ================= POSITIVE REINFORCEMENT ================= */
     if (total < 5000 && expenses.length >= 5) {
       result.push({
         level: "success",
-        title: "Healthy Spending Behavior",
+        title: "Healthy Financial Behavior",
         message:
-          "Your overall spending is currently well balanced and under control.",
+          "Your overall spending is controlled and consistent.",
         suggestion:
-          "Maintaining this consistency will help you reach your financial goals faster.",
+          "Consistency like this builds long-term financial stability.",
       });
     }
 
@@ -104,8 +157,7 @@ export default function SmartInsights({ expenses }) {
         Smart Insights
       </h3>
       <p className="text-xs text-gray-500">
-        Personalized observations based on your recent
-        spending activity.
+        Personalized insights based on your real spending behavior.
       </p>
 
       <ul className="space-y-3">

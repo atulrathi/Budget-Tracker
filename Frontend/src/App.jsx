@@ -10,6 +10,7 @@ import AppLayout from "../src/layouts/AppLayouts";
 import Insights from "./pages/Insights/Insights";
 import Subscriptions from "./pages/Subscriptions/Subscripton"
 import Proctedroute from "./pages/proctedroute/Userproctedroute";
+import Userproctedroute from "./pages/proctedroute/userloginroute";
 
 function App() {
   // 🔥 CENTRAL DATA SOURCE
@@ -20,7 +21,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Userproctedroute><Login /></Userproctedroute>} />
       <Route path="/register" element={<Register />} />
 
       <Route element={<AppLayout />}>
