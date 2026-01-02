@@ -85,7 +85,8 @@ exports.getTrackedBudgets = async (req, res) => {
     const expenses = await Expense.aggregate([
       {
     $match: {
-      userId: userObjectId, // 🔥 FIX #1
+      userId: userObjectId,
+      deleted: false, 
       date: { $gte: start, $lt: end },
     },
   },
