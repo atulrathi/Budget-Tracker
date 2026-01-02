@@ -1,4 +1,13 @@
 import { useMemo } from "react";
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  AlertTriangle, 
+  CheckCircle, 
+  Info, 
+  Lightbulb,
+  Brain
+} from "lucide-react";
 
 export default function SmartInsights({ expenses }) {
   const insights = useMemo(() => {
@@ -40,7 +49,7 @@ export default function SmartInsights({ expenses }) {
     result.push({
       level: "info",
       title: "Daily Spending Overview",
-      message: `You spend about ₹${calendarDailyAvg} per day on average across this period. On days you actually spend money, the average rises to ₹${activeDailyAvg}.`,
+      message: `You spend about ₹${calendarDailyAvg.toLocaleString('en-IN')} per day on average across this period. On days you actually spend money, the average rises to ₹${activeDailyAvg.toLocaleString('en-IN')}.`,
       suggestion:
         "Keeping an eye on non-spending days helps build stronger saving habits.",
     });
@@ -64,7 +73,7 @@ export default function SmartInsights({ expenses }) {
       result.push({
         level: percent > 50 ? "warning" : "info",
         title: "Top Spending Category",
-        message: `"${topCategory}" accounts for ${percent}% of your total expenses.`,
+        message: `"${topCategory}" accounts for ${percent}% of your total expenses (₹${topAmount.toLocaleString('en-IN')}).`,
         suggestion:
           percent > 50
             ? "This category dominates your spending. Consider setting a limit or reviewing alternatives."
@@ -111,10 +120,10 @@ export default function SmartInsights({ expenses }) {
         title: "Spending Trend",
         message:
           changePercent > 0
-            ? `Your spending increased by ${changePercent}% compared to the previous week.`
+            ? `Your spending increased by ${changePercent}% compared to the previous week (₹${last7Total.toLocaleString('en-IN')} vs ₹${prev7Total.toLocaleString('en-IN')}).`
             : `Good job! Your spending dropped by ${Math.abs(
                 changePercent
-              )}% compared to last week.`,
+              )}% compared to last week (₹${last7Total.toLocaleString('en-IN')} vs ₹${prev7Total.toLocaleString('en-IN')}).`,
         suggestion:
           changePercent > 20
             ? "Review recent purchases to avoid budget drift."
@@ -151,41 +160,112 @@ export default function SmartInsights({ expenses }) {
 
   if (insights.length === 0) return null;
 
-  return (
-    <div className="bg-white border rounded-xl p-5 space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900">
-        Smart Insights
-      </h3>
-      <p className="text-xs text-gray-500">
-        Personalized insights based on your real spending behavior.
-      </p>
+  const getLevelConfig = (level) => {
+    const configs = {
+      warning: {
+        gradient: "from-red-500 to-rose-600",
+        bg: "from-red-50 to-rose-50",
+        border: "border-red-200",
+        icon: AlertTriangle,
+        iconBg: "bg-red-100",
+        iconColor: "text-red-600",
+        textColor: "text-red-900",
+      },
+      success: {
+        gradient: "from-emerald-500 to-green-600",
+        bg: "from-emerald-50 to-green-50",
+        border: "border-emerald-200",
+        icon: CheckCircle,
+        iconBg: "bg-emerald-100",
+        iconColor: "text-emerald-600",
+        textColor: "text-emerald-900",
+      },
+      info: {
+        gradient: "from-blue-500 to-indigo-600",
+        bg: "from-blue-50 to-indigo-50",
+        border: "border-blue-200",
+        icon: Info,
+        iconBg: "bg-blue-100",
+        iconColor: "text-blue-600",
+        textColor: "text-blue-900",
+      },
+      neutral: {
+        gradient: "from-gray-500 to-slate-600",
+        bg: "from-gray-50 to-slate-50",
+        border: "border-gray-200",
+        icon: TrendingUp,
+        iconBg: "bg-gray-100",
+        iconColor: "text-gray-600",
+        textColor: "text-gray-900",
+      },
+    };
+    return configs[level] || configs.neutral;
+  };
 
-      <ul className="space-y-3">
-        {insights.map((item, index) => (
-          <li
-            key={index}
-            className={`p-4 rounded-lg border-l-4 ${
-              item.level === "warning"
-                ? "bg-red-50 border-red-500"
-                : item.level === "success"
-                ? "bg-green-50 border-green-500"
-                : item.level === "info"
-                ? "bg-blue-50 border-blue-500"
-                : "bg-gray-50 border-gray-400"
-            }`}
-          >
-            <p className="text-sm font-semibold text-gray-800">
-              {item.title}
-            </p>
-            <p className="text-sm text-gray-700 mt-1">
-              {item.message}
-            </p>
-            <p className="text-xs text-gray-600 mt-2">
-              💡 {item.suggestion}
-            </p>
-          </li>
-        ))}
-      </ul>
+  return (
+    <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-lg">
+      {/* HEADER */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center">
+          <Brain className="w-5 h-5 text-white" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-gray-900">Smart Insights</h3>
+          <p className="text-sm text-gray-600">
+            AI-powered analysis of your spending behavior
+          </p>
+        </div>
+      </div>
+
+      {/* INSIGHTS LIST */}
+      <div className="space-y-4">
+        {insights.map((item, index) => {
+          const config = getLevelConfig(item.level);
+          const Icon = config.icon;
+
+          return (
+            <div
+              key={index}
+              className={`relative bg-gradient-to-br ${config.bg} border ${config.border} rounded-xl p-6 overflow-hidden group hover:shadow-md transition-all duration-300`}
+            >
+              {/* Decorative element */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-30 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-300"></div>
+              
+              <div className="relative z-10">
+                {/* Header with icon */}
+                <div className="flex items-start gap-4 mb-3">
+                  <div className={`w-10 h-10 ${config.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <Icon className={`w-5 h-5 ${config.iconColor}`} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className={`font-bold text-base ${config.textColor} mb-2`}>
+                      {item.title}
+                    </h4>
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {item.message}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Suggestion */}
+                <div className="flex items-start gap-3 mt-4 pt-4 border-t border-gray-200/50">
+                  <Lightbulb className={`w-4 h-4 ${config.iconColor} flex-shrink-0 mt-0.5`} />
+                  <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                    {item.suggestion}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* FOOTER NOTE */}
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <p className="text-xs text-gray-500 text-center">
+          Insights are generated based on your spending patterns and updated in real-time
+        </p>
+      </div>
     </div>
   );
 }
