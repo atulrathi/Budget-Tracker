@@ -55,7 +55,7 @@ export default function Expenses() {
 
   const updateExpense = useCallback((updated) => {
     setExpenses((prev) =>
-      prev.map((e) => (e._id === updated._id ? updated : e))
+      prev.map((e) => (e._id === updated.expense._id ? updated.expense : e))
     );
     setShowForm(false);
   }, []);
@@ -236,6 +236,7 @@ export default function Expenses() {
               setEditingExpense={setEditingExpense}
               addExpense={addExpense}
               updateExpense={updateExpense}
+              fetchExpenses={fetchExpenses}
             />
           </section>
         )}

@@ -26,6 +26,7 @@ export default function ExpenseForm({
   setEditingExpense,
   addExpense,
   updateExpense,
+  fetchExpenses,
 }) {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");

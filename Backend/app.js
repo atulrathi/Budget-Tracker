@@ -2,16 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const auth = require("./Routes/auth.route");
 const Expense = require("./Routes/Expence.route");
-const Catogary = require("./Routes/Catogery.route");
 const Budget = require("./Routes/Budget");
 const Insight = require("./Routes/Insight");
+const subscriptions = require("./Routes/subscriptions");
 
 const app = express();
 
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH "],
   })
 );
 
@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth",auth);
 app.use("/expenses",Expense);
-app.use("catogary",Catogary);
 app.use("/budgets",Budget);
 app.use("/insights", Insight );
+app.use("/subscriptions",subscriptions);
 
 module.exports = app;

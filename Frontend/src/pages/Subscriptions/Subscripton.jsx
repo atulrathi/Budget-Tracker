@@ -1,240 +1,546 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
 import { 
   Repeat, 
-  CreditCard, 
-  TrendingUp, 
-  Lightbulb, 
+  Plus,
   Calendar,
   DollarSign,
-  AlertCircle
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  Pause,
+  Play,
+  Trash2,
+  Edit2,
+  X,
+  Loader2,
+  Clock
 } from "lucide-react";
 
-export default function Subscriptions({ expenses }) {
-  // 🔁 Detect recurring expenses
-  const subscriptionMap = {};
+const API_URL = "http://localhost:5000/subscriptions";
 
-  expenses.forEach(exp => {
-    const key = `${exp.title}-${exp.amount}`;
-    subscriptionMap[key] = subscriptionMap[key]
-      ? {
-          ...subscriptionMap[key],
-          count: subscriptionMap[key].count + 1,
-        }
-      : {
-          title: exp.title,
-          amount: exp.amount,
-          count: 1,
-        };
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("token")}`,
+});
+
+export default function Subscriptions() {
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingSubscription, setEditingSubscription] = useState(null);
+  const [processing, setProcessing] = useState(false);
+
+  // Form state
+  const [formData, setFormData] = useState({
+    name: '',
+    amount: '',
+    category: 'Subscriptions',
+    frequency: 'monthly',
+    startDate: new Date().toISOString().split('T')[0],
+    notes: '',
+    reminderDays: 3
   });
+  const [formError, setFormError] = useState('');
 
-  // Keep only recurring ones
-  const subscriptions = Object.values(subscriptionMap).filter(
-    sub => sub.count >= 2
-  );
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
 
-  const totalSubscriptionCost = subscriptions.reduce(
-    (sum, sub) => sum + sub.amount,
-    0
-  );
+  const fetchSubscriptions = async () => {
+    try {
+      setLoading(true);
+      const { data } = await axios.get(API_URL, {
+        headers: getAuthHeaders(),
+      });
+      setSubscriptions(data.subscriptions || []);
+      setSummary(data.summary || null);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Calculate yearly cost
-  const yearlyCost = totalSubscriptionCost * 12;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormError('');
+
+    if (!formData.name || !formData.amount) {
+      setFormError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      if (editingSubscription) {
+        await axios.put(
+          `${API_URL}/${editingSubscription._id}`,
+          formData,
+          { headers: getAuthHeaders() }
+        );
+      } else {
+        await axios.post(API_URL, formData, {
+          headers: getAuthHeaders(),
+        });
+      }
+
+      setShowForm(false);
+      setEditingSubscription(null);
+      resetForm();
+      fetchSubscriptions();
+    } catch (error) {
+      setFormError(error.response?.data?.message || 'Failed to save subscription');
+    }
+  };
+
+  const handleEdit = (subscription) => {
+    setEditingSubscription(subscription);
+    setFormData({
+      name: subscription.name,
+      amount: subscription.amount,
+      category: subscription.category,
+      frequency: subscription.frequency,
+      startDate: new Date(subscription.startDate).toISOString().split('T')[0],
+      notes: subscription.notes || '',
+      reminderDays: subscription.reminderDays || 3
+    });
+    setShowForm(true);
+  };
+
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+      await axios.patch(
+        `${API_URL}/${id}/toggle`,
+        { status: newStatus },
+        { headers: getAuthHeaders() }
+      );
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error toggling subscription:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this subscription?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_URL}/${id}`, {
+        headers: getAuthHeaders(),
+      });
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+    }
+  };
+
+  const handleProcessRenewals = async () => {
+    if (!window.confirm('Process all due renewals and create expenses?')) {
+      return;
+    }
+
+    try {
+      setProcessing(true);
+      const { data } = await axios.post(
+        `${API_URL}/process-renewals`,
+        {},
+        { headers: getAuthHeaders() }
+      );
+      alert(`Processed ${data.processed} renewals successfully!`);
+      fetchSubscriptions();
+    } catch (error) {
+      console.error('Error processing renewals:', error);
+      alert('Failed to process renewals');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      amount: '',
+      category: 'Subscriptions',
+      frequency: 'monthly',
+      startDate: new Date().toISOString().split('T')[0],
+      notes: '',
+      reminderDays: 3
+    });
+    setFormError('');
+  };
+
+  const getDaysUntilRenewal = (nextRenewalDate) => {
+    const today = new Date();
+    const renewal = new Date(nextRenewalDate);
+    const diffTime = renewal - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getStatusColor = (days) => {
+    if (days < 0) return { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' };
+    if (days <= 3) return { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' };
+    if (days <= 7) return { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' };
+    return { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' };
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center py-32">
+            <Loader2 className="w-12 h-12 text-cyan-600 animate-spin" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
         {/* HEADER */}
-        <header className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-            <Repeat className="w-7 h-7 text-white" />
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Repeat className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+                Subscriptions
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Manage recurring expenses automatically
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              Subscriptions
-            </h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Track and manage your recurring expenses
-            </p>
+          
+          <div className="flex gap-3">
+            <button
+              onClick={handleProcessRenewals}
+              disabled={processing}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white text-cyan-600 rounded-xl font-medium hover:bg-cyan-50 transition-all shadow-md hover:shadow-lg border border-cyan-100"
+            >
+              <Clock className={`w-4 h-4 ${processing ? 'animate-spin' : ''}`} />
+              Process Due
+            </button>
+            
+            <button
+              onClick={() => {
+                setShowForm(!showForm);
+                setEditingSubscription(null);
+                resetForm();
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700 transition-all font-semibold shadow-lg hover:shadow-xl"
+            >
+              <Plus className="w-5 h-5" />
+              Add Subscription
+            </button>
           </div>
         </header>
 
         {/* SUMMARY CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Monthly Cost */}
-          <div className="relative bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl shadow-2xl p-8 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
-                <DollarSign className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/80 text-sm font-medium mb-2">Monthly Cost</p>
-              <p className="text-4xl font-bold text-white mb-2">
-                ₹{totalSubscriptionCost.toLocaleString('en-IN')}
-              </p>
-              <p className="text-white/70 text-sm">
-                {subscriptions.length} active subscription{subscriptions.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-          </div>
-
-          {/* Yearly Projection */}
-          <div className="relative bg-gradient-to-br from-orange-500 to-amber-600 rounded-3xl shadow-2xl p-8 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/80 text-sm font-medium mb-2">Yearly Projection</p>
-              <p className="text-4xl font-bold text-white mb-2">
-                ₹{yearlyCost.toLocaleString('en-IN')}
-              </p>
-              <p className="text-white/70 text-sm">
-                Annual recurring cost
-              </p>
-            </div>
-          </div>
-
-          {/* Average per Subscription */}
-          <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-2xl p-8 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white opacity-10 rounded-full -mr-20 -mt-20"></div>
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-4 border border-white/30">
-                <TrendingUp className="w-6 h-6 text-white" />
-              </div>
-              <p className="text-white/80 text-sm font-medium mb-2">Average Cost</p>
-              <p className="text-4xl font-bold text-white mb-2">
-                ₹{subscriptions.length > 0 ? Math.round(totalSubscriptionCost / subscriptions.length).toLocaleString('en-IN') : 0}
-              </p>
-              <p className="text-white/70 text-sm">
-                Per subscription
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* SUBSCRIPTION LIST */}
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-gray-50 to-slate-50 px-8 py-6 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Active Subscriptions</h2>
-                <p className="text-sm text-gray-600">
-                  Automatically detected recurring expenses
+        {summary && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="relative bg-gradient-to-br from-red-500 to-rose-600 rounded-3xl shadow-2xl p-6 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/30">
+                  <DollarSign className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-white/80 text-xs font-medium mb-1">Monthly Cost</p>
+                <p className="text-3xl font-bold text-white">
+                  ₹{summary.monthlyTotal.toLocaleString('en-IN')}
                 </p>
               </div>
             </div>
-          </div>
 
-          <div className="p-8">
-            {subscriptions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-4">
-                  <Repeat className="w-10 h-10 text-gray-400" />
+            <div className="relative bg-gradient-to-br from-orange-500 to-amber-600 rounded-3xl shadow-2xl p-6 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/30">
+                  <Calendar className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">No Subscriptions Detected</h3>
-                <p className="text-gray-600 max-w-md">
-                  We haven't detected any recurring expenses yet. Subscriptions are automatically identified when expenses with the same name and amount appear multiple times.
+                <p className="text-white/80 text-xs font-medium mb-1">Yearly Cost</p>
+                <p className="text-3xl font-bold text-white">
+                  ₹{summary.yearlyTotal.toLocaleString('en-IN')}
                 </p>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {subscriptions.map((sub, index) => {
-                  const colors = [
-                    { gradient: "from-red-500 to-pink-600", bg: "from-red-50 to-pink-50" },
-                    { gradient: "from-blue-500 to-indigo-600", bg: "from-blue-50 to-indigo-50" },
-                    { gradient: "from-emerald-500 to-green-600", bg: "from-emerald-50 to-green-50" },
-                    { gradient: "from-orange-500 to-amber-600", bg: "from-orange-50 to-amber-50" },
-                    { gradient: "from-purple-500 to-pink-600", bg: "from-purple-50 to-pink-50" },
-                  ];
-                  const color = colors[index % colors.length];
+            </div>
 
-                  return (
-                    <div
-                      key={index}
-                      className={`group relative bg-gradient-to-r ${color.bg} border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 overflow-hidden`}
-                    >
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-30 rounded-full -mr-16 -mt-16 group-hover:scale-110 transition-transform duration-300"></div>
-                      
-                      <div className="relative z-10 flex justify-between items-center">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className={`w-12 h-12 bg-gradient-to-br ${color.gradient} rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-gray-900 text-lg mb-1 capitalize">
-                              {sub.title}
-                            </h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Repeat className="w-4 h-4" />
-                              <span>Recurring {sub.count} times</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">
-                            ₹{sub.amount.toLocaleString('en-IN')}
-                          </p>
-                          <p className="text-sm text-gray-600 font-medium">per month</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+            <div className="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-2xl p-6 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/30">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-white/80 text-xs font-medium mb-1">Average</p>
+                <p className="text-3xl font-bold text-white">
+                  ₹{summary.averageCost.toLocaleString('en-IN')}
+                </p>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* SMART SUGGESTION */}
-        {subscriptions.length > 0 && (
-          <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl shadow-lg p-8 border border-amber-200 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-amber-200 opacity-20 rounded-full -mr-20 -mt-20"></div>
-            <div className="relative z-10">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-2xl shadow-lg flex-shrink-0">
-                  💡
+            <div className="relative bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl shadow-2xl p-6 overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-3 border border-white/30">
+                  <Repeat className="w-5 h-5 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-3">Smart Insights</h2>
-                  <div className="space-y-4">
-                    <div className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-amber-200">
-                      <p className="text-gray-700 leading-relaxed">
-                        You're spending{" "}
-                        <span className="font-bold text-red-600">₹{totalSubscriptionCost.toLocaleString('en-IN')}</span>{" "}
-                        every month on subscriptions. That's{" "}
-                        <span className="font-bold text-orange-600">₹{yearlyCost.toLocaleString('en-IN')}</span>{" "}
-                        per year!
-                      </p>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <Lightbulb className="w-5 h-5 text-amber-600 flex-shrink-0 mt-1" />
-                      <div>
-                        <p className="font-semibold text-gray-900 mb-2">Recommendations:</p>
-                        <ul className="space-y-2 text-sm text-gray-700">
-                          <li className="flex items-start gap-2">
-                            <span className="text-amber-600 font-bold">•</span>
-                            <span>Review all subscriptions and cancel any you don't actively use</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-amber-600 font-bold">•</span>
-                            <span>Look for annual plans that offer better rates than monthly</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-amber-600 font-bold">•</span>
-                            <span>Set calendar reminders before renewal dates to reassess</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-white/80 text-xs font-medium mb-1">Active</p>
+                <p className="text-3xl font-bold text-white">
+                  {summary.active} / {summary.total}
+                </p>
               </div>
             </div>
           </div>
         )}
+
+        {/* ADD/EDIT FORM */}
+        {showForm && (
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {editingSubscription ? 'Edit Subscription' : 'Add New Subscription'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingSubscription(null);
+                  resetForm();
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {formError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Subscription Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="e.g., Netflix, Spotify"
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Amount (₹) *
+                </label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({...formData, amount: e.target.value})}
+                  placeholder="0"
+                  min="0"
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) => setFormData({...formData, category: e.target.value})}
+                  placeholder="Subscriptions"
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Frequency *
+                </label>
+                <select
+                  value={formData.frequency}
+                  onChange={(e) => setFormData({...formData, frequency: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Start Date *
+                </label>
+                <input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Reminder (days before)
+                </label>
+                <input
+                  type="number"
+                  value={formData.reminderDays}
+                  onChange={(e) => setFormData({...formData, reminderDays: e.target.value})}
+                  min="0"
+                  max="30"
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Notes (Optional)
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  placeholder="Any additional notes..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingSubscription(null);
+                  resetForm();
+                }}
+                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-semibold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                {editingSubscription ? 'Update' : 'Create'} Subscription
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SUBSCRIPTIONS LIST */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-lg p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Subscriptions</h2>
+
+          {subscriptions.length === 0 ? (
+            <div className="text-center py-16">
+              <Repeat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-600 mb-4">No subscriptions yet</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+              >
+                Add Your First Subscription
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {subscriptions.map((sub) => {
+                const daysUntil = getDaysUntilRenewal(sub.nextRenewalDate);
+                const statusColor = getStatusColor(daysUntil);
+
+                return (
+                  <div
+                    key={sub._id}
+                    className="group relative bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-xl font-bold text-gray-900">{sub.name}</h3>
+                          <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                            sub.status === 'active' ? 'bg-green-100 text-green-700' :
+                            sub.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {sub.status}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          <span className="font-semibold">₹{sub.amount.toLocaleString('en-IN')} / {sub.frequency}</span>
+                          <span>•</span>
+                          <span>{sub.category}</span>
+                        </div>
+
+                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 ${statusColor.bg} ${statusColor.border} border rounded-lg`}>
+                          <Clock className={`w-4 h-4 ${statusColor.text}`} />
+                          <span className={`text-sm font-semibold ${statusColor.text}`}>
+                            {daysUntil < 0 
+                              ? `Overdue by ${Math.abs(daysUntil)} days` 
+                              : daysUntil === 0
+                              ? 'Renews today!'
+                              : `${daysUntil} days until renewal`
+                            }
+                          </span>
+                        </div>
+
+                        {sub.notes && (
+                          <p className="text-sm text-gray-500 mt-2">{sub.notes}</p>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleToggleStatus(sub._id, sub.status)}
+                          className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all"
+                          title={sub.status === 'active' ? 'Pause' : 'Resume'}
+                        >
+                          {sub.status === 'active' ? (
+                            <Pause className="w-4 h-4 text-gray-700" />
+                          ) : (
+                            <Play className="w-4 h-4 text-gray-700" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleEdit(sub)}
+                          className="p-2 bg-blue-100 hover:bg-blue-200 rounded-lg transition-all"
+                        >
+                          <Edit2 className="w-4 h-4 text-blue-700" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(sub._id)}
+                          className="p-2 bg-red-100 hover:bg-red-200 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-700" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

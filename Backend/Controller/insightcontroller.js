@@ -15,11 +15,13 @@ exports.insightrout = async (req, res) => {
     const [currentMonthExpenses, lastMonthExpenses] = await Promise.all([
       Expense.find({
         userId: userId,
-        date: { $gte: currentMonthStart, $lte: currentMonthEnd }
+        date: { $gte: currentMonthStart, $lte: currentMonthEnd },
+        deleted: false
       }).lean(),
       Expense.find({
         userId: userId,
-        date: { $gte: lastMonthStart, $lte: lastMonthEnd }
+        date: { $gte: lastMonthStart, $lte: lastMonthEnd },
+        deleted: false
       }).lean()
     ]);
 

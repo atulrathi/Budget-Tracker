@@ -7,7 +7,7 @@ exports.monthlySummary = async (req, res) => {
 
     const summary = await Expense.aggregate([
       {
-        $match: { userId }
+        $match: { userId, deleted: false },
       },
       {
         $group: {
@@ -39,7 +39,7 @@ exports.monthlySummary = async (req, res) => {
   }
 };
 
-// 📂 Category-wise expenses
+//  Category-wise expenses
 exports.categoryWiseExpense = async (req, res) => {
   try {
     const userId = req.userId;
@@ -49,6 +49,7 @@ exports.categoryWiseExpense = async (req, res) => {
         $match: {
           userId,
           type: "expense",
+          deleted: false
         },
       },
       {

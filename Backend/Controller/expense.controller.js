@@ -28,10 +28,29 @@ exports.addExpense = async (req, res) => {
 
 exports.getExpenses = async (req, res) => {
   try {
+
+    const now = new Date();
+
+// Start of current month (00:00:00)
+const startOfMonth = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  1
+);
+
+// Start of next month (used as end boundary)
+const endOfMonth = new Date(
+  now.getFullYear(),
+  now.getMonth() + 1,
+  1
+);
+
+
     // Fetch all expenses
     const expenses = await Expense.find({ 
       userId: req.userId, 
-      deleted: false 
+      deleted: false ,
+      date: { $gte: startOfMonth, $lt: endOfMonth }
     }).sort({ date: -1 });
 
     // ==================== DASHBOARD CALCULATIONS ====================
