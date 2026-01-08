@@ -1,4 +1,5 @@
 const Expense = require("../Models/Expense");
+const user = require("../Models/User");
 
 //  Add Expense
 exports.addExpense = async (req, res) => {
@@ -52,12 +53,21 @@ const endOfMonth = new Date(
       deleted: false ,
     }).sort({ date: -1 });
 
+    const userdata = await user.findById(req.userId);
+
+    if (!expenses || !userdata) {
+      return res.status(404).json({
+        success: false,
+        message: "No expenses or user data found",
+      });
+    }
+
     // ==================== DASHBOARD CALCULATIONS ====================
     const filterexpense = expenses.filter(e =>  e.date >= startOfMonth && e.date < endOfMonth );
     // 1. Calculate totals
     const totalSpending = filterexpense.reduce((sum, e) => sum + e.amount, 0);
-    const income = 50000;
-    const budget = 40000;
+    const income = userdata.Income;
+    const budget = 50000;
     const savings = income - totalSpending;
     
     // 2. Calculate percentages

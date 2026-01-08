@@ -8,7 +8,8 @@ import {
   LogOut
 } from "lucide-react";
 import Income from "../Components/income";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useContext } from "react";
+import {UserContext } from "../usecontext/usercontext";
 
 const NAV_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -24,6 +25,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [income,setIncome]=useState('');
+  const userContext = useContext(UserContext);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -47,6 +49,8 @@ export default function AppLayout() {
 
       const data = await response.json();
       setUser(data.user);
+      setIncome(data.user.Income);
+      userContext.income = data.user.Income;
     } catch (err) {
       console.error("Error fetching user data:", err.message);
       localStorage.removeItem("token");
@@ -125,7 +129,7 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        {!income ? <Income /> : <Outlet />}
+        {!income ? <Income setIncomee={setIncome} /> : <Outlet Incomee={income} />}
       </main>
     </div>
   );

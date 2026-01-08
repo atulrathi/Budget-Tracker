@@ -27,12 +27,17 @@ import {
   Activity
 } from "lucide-react";
 
+import { useContext } from "react";
+import {UserContext} from "../../usecontext/usercontext";
+
 const COLORS = ["#6366F1", "#10B981", "#EF4444", "#8B5CF6", "#F59E0B", "#06B6D4", "#EC4899"];
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const userContext = useContext(UserContext);
+  const [userincome, setuserincome] = useState();
 
   const fetchDashboard = async () => {
     try {
@@ -57,7 +62,7 @@ export default function Dashboard() {
 
       const data = await response.json();
       setDashboardData(data.dashboard);
-      
+      setuserincome(!userContext.income?window.location.reload():userContext.income);
     } catch (err) {
       setError(err.message);
       console.error("Dashboard error:", err);
@@ -193,14 +198,14 @@ export default function Dashboard() {
 
         {/* SUMMARY CARDS */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
+          {userincome&&<StatCard
             icon={<Wallet className="w-6 h-6" />}
             title="Monthly Income"
-            value={`₹${dashboardData.summary.income.toLocaleString('en-IN')}`}
+            value={`₹${userincome}`}
             subtitle="Total income"
             gradient="from-blue-500 to-cyan-600"
             bgGradient="from-blue-50 to-cyan-50"
-          />
+          />}
           <StatCard
             icon={<TrendingUp className="w-6 h-6" />}
             title="Total Spending"

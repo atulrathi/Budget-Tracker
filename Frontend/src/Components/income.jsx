@@ -12,7 +12,7 @@ const formatCurrency = (value) => {
   };import { useState, useEffect } from 'react';
 import { DollarSign, Briefcase, TrendingUp, CheckCircle, Wallet, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 
-export default function IncomeEntryForm() {
+export default function IncomeEntryForm({setIncomee}) {
   const [income, setIncome] = useState('');
   const [source, setSource] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -64,13 +64,9 @@ export default function IncomeEntryForm() {
       });
 
       const result = await incomedata.json();
-
-      console.log('Income saved:', result);
-      // Simulate API error (uncomment to test error handling)
-      // throw new Error('Failed to save income data');
-      
       setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 3000);
+      setTimeout(() => setSubmitted(false), 1000);
+      setTimeout(() => setIncomee(result.user), 1500);
       
     } catch (err) {
       setError('Failed to save income information. Please try again.');
