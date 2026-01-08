@@ -35,7 +35,8 @@ export default function Expenses() {
       const { data } = await axios.get(`${API_BASE_URL}/expenses`, {
         headers: getAuthHeaders(),
       });
-      setExpenses(data?.expenses || []);
+      setExpenses(data?.filterexpense || []);
+      console.log("Fetched expenses:", data);
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {

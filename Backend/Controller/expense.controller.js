@@ -50,13 +50,12 @@ const endOfMonth = new Date(
     const expenses = await Expense.find({ 
       userId: req.userId, 
       deleted: false ,
-      date: { $gte: startOfMonth, $lt: endOfMonth }
     }).sort({ date: -1 });
 
     // ==================== DASHBOARD CALCULATIONS ====================
-    
+    const filterexpense = expenses.filter(e =>  e.date >= startOfMonth && e.date < endOfMonth );
     // 1. Calculate totals
-    const totalSpending = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalSpending = filterexpense.reduce((sum, e) => sum + e.amount, 0);
     const income = 50000;
     const budget = 40000;
     const savings = income - totalSpending;
@@ -141,7 +140,7 @@ const endOfMonth = new Date(
     // ==================== SEND COMPLETE RESPONSE ====================
     res.json({
       success: true,
-      expenses,
+      filterexpense,
       dashboard: {
         summary: {
           income,

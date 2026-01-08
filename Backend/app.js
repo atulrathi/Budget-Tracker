@@ -5,6 +5,8 @@ const Expense = require("./Routes/Expence.route");
 const Budget = require("./Routes/Budget");
 const Insight = require("./Routes/Insight");
 const subscriptions = require("./Routes/subscriptions");
+const crruser = require("./Routes/crruser");
+const userincome = require("./Routes/user.income")
 
 const app = express();
 
@@ -23,5 +25,7 @@ app.use("/expenses",Expense);
 app.use("/budgets",Budget);
 app.use("/insights", Insight );
 app.use("/subscriptions",subscriptions);
+app.use("/user",crruser);
+app.use("/income",userincome);
 
 module.exports = app;

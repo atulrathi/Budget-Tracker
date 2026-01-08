@@ -137,7 +137,7 @@ export default function Insights() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 z-10">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
@@ -171,7 +171,7 @@ export default function Insights() {
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
                 <p className="text-white/70 text-sm font-medium mb-2 flex items-center gap-2">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                  {insights.currentMonth} 2024
+                  {insights.currentMonth} 
                 </p>
                 <p className="text-4xl font-bold text-white mb-1">
                   {formatCurrency(insights.currentTotal)}
@@ -182,7 +182,7 @@ export default function Insights() {
               {/* Last Month */}
               <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
                 <p className="text-white/70 text-sm font-medium mb-2">
-                  {insights.lastMonth} 2024
+                  {insights.lastMonth} 
                 </p>
                 <p className="text-4xl font-bold text-white mb-1">
                   {formatCurrency(insights.lastTotal)}
