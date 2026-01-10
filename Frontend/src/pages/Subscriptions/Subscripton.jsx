@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { 
   Repeat, 
@@ -13,7 +13,6 @@ import {
   Trash2,
   Edit2,
   X,
-  Loader2,
   Clock
 } from "lucide-react";
 
@@ -42,10 +41,22 @@ export default function Subscriptions() {
     reminderDays: 3
   });
   const [formError, setFormError] = useState('');
+  const targetref = useRef(null);
+
+  //scroll to top on load
+  const scrollTo = useCallback(() => {
+    targetref.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
 
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+    if(showForm){
+      scrollTo();
+    }
+  }, [showForm]);
 
   const fetchSubscriptions = async () => {
     try {
@@ -189,9 +200,68 @@ export default function Subscriptions() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center py-32">
-            <Loader2 className="w-12 h-12 text-cyan-600 animate-spin" />
+        <div className="max-w-7xl mx-auto space-y-6">
+          
+          {/* HEADER SKELETON */}
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="space-y-2">
+                <div className="h-8 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 w-64 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <div className="h-10 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-10 w-44 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+          </header>
+
+          {/* SUMMARY CARDS SKELETON */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="relative bg-white rounded-3xl shadow-2xl p-6 overflow-hidden border border-gray-100">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-3 w-20 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-8 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* SUBSCRIPTIONS LIST SKELETON */}
+          <div className="bg-white border border-gray-100 rounded-2xl shadow-lg p-8">
+            <div className="h-6 w-56 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%] mb-6"></div>
+
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-6 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                        <div className="h-5 w-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4">
+                        <div className="h-4 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                        <div className="h-4 w-20 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                      </div>
+
+                      <div className="h-8 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="w-9 h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                      <div className="w-9 h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                      <div className="w-9 h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -301,7 +371,7 @@ export default function Subscriptions() {
 
         {/* ADD/EDIT FORM */}
         {showForm && (
-          <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8">
+          <div ref={targetref} className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingSubscription ? 'Edit Subscription' : 'Add New Subscription'}

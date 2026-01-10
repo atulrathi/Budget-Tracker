@@ -1,9 +1,8 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
 import { 
   Receipt, 
   TrendingDown, 
-  Loader2, 
   RefreshCw,
   Plus,
   BarChart3
@@ -27,6 +26,16 @@ export default function Expenses() {
   const [showAll, setShowAll] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const targetref = useRef(null);
+
+  //window scroll to form when it appears
+
+const scrollTo = useCallback(() => {
+  targetref.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}, []);
 
   /* ================= FETCH ================= */
   const fetchExpenses = useCallback(async () => {
@@ -36,7 +45,6 @@ export default function Expenses() {
         headers: getAuthHeaders(),
       });
       setExpenses(data?.filterexpense || []);
-      console.log("Fetched expenses:", data);
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -46,7 +54,10 @@ export default function Expenses() {
 
   useEffect(() => {
     fetchExpenses();
-  }, [fetchExpenses]);
+    if(showForm || editingExpense){
+      scrollTo();
+    }
+  }, [fetchExpenses,showForm,scrollTo,editingExpense]);
 
   /* ================= STATE ================= */
   const addExpense = useCallback((expense) => {
@@ -107,31 +118,92 @@ export default function Expenses() {
 
   const hasExpenses = expenses.length > 0;
 
-  /* ================= LOADING STATE ================= */
+  /* ================= LOADING STATE WITH SKELETON ================= */
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Receipt className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">
-              Expenses
-            </h1>
-          </div>
+        <div className="max-w-7xl mx-auto space-y-6">
           
-          <div className="flex items-center justify-center py-32">
-            <div className="text-center">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-rose-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-                  <Loader2 className="w-10 h-10 text-white animate-spin" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500 to-orange-600 rounded-full blur-xl opacity-30 animate-pulse"></div>
+          {/* HEADER SKELETON */}
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="space-y-2">
+                <div className="h-8 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 w-56 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
               </div>
-              <p className="text-gray-600 text-lg font-medium">Loading expenses...</p>
             </div>
-          </div>
+            
+            <div className="flex gap-3">
+              <div className="h-10 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-10 w-36 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+          </header>
+
+          {/* KPI CARD SKELETON */}
+          <section className="relative bg-white rounded-3xl shadow-2xl p-8 overflow-hidden border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="space-y-3 flex-1">
+                <div className="h-4 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-12 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-3 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+              <div className="w-16 h-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-2xl animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+          </section>
+
+          {/* CATEGORY ANALYTICS SKELETON */}
+          <section className="bg-white border border-gray-100 rounded-2xl p-8 shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="space-y-2 flex-1">
+                <div className="h-6 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 w-64 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            </div>
+            
+            <div className="h-64 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+          </section>
+
+          {/* TRANSACTION HISTORY SKELETON */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-4 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              </div>
+            </div>
+
+            {/* Search Bar Skeleton */}
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-lg">
+              <div className="h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%] mb-6"></div>
+              
+              {/* Transaction Cards Skeleton */}
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-gradient-to-r from-gray-50 to-white border border-gray-100 rounded-xl p-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+                        <div className="space-y-2 flex-1">
+                          <div className="h-5 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                          <div className="h-4 w-24 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-7 w-24 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                        <div className="flex gap-2">
+                          <div className="w-9 h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                          <div className="w-9 h-9 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
       </div>
     );
@@ -162,9 +234,9 @@ export default function Expenses() {
             <button
               onClick={fetchExpenses}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-rose-600 rounded-xl font-medium hover:bg-rose-50 transition-all shadow-md hover:shadow-lg border border-rose-100"
+              className="group flex items-center gap-2 px-4 py-2.5 bg-white text-rose-600 rounded-xl font-medium hover:bg-rose-50 transition-all shadow-md hover:shadow-lg border border-rose-100"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-4 h-4 group-hover:rotate-360 transition-all duration-1000`} />
               Refresh
             </button>
             
@@ -204,7 +276,7 @@ export default function Expenses() {
 
         {/* ADD/EDIT FORM (MODAL STYLE) */}
         {showForm && (
-          <section className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8 animate-fadeIn">
+          <section ref={targetref} className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8 animate-fadeIn">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">

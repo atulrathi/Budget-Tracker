@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, AlertCircle, Loader2, RefreshCw, Sparkles, PieChart, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertCircle, RefreshCw, Sparkles, PieChart, Calendar } from "lucide-react";
 
 export default function Insights() {
   const [insights, setInsights] = useState(null);
@@ -46,28 +46,86 @@ export default function Insights() {
     }).format(amount);
   };
 
-  // Loading State
+  // Loading State with Skeleton
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-8 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]"></div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Insights
-            </h1>
+            <div className="h-10 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
           </div>
-          <div className="flex items-center justify-center py-32">
-            <div className="text-center">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
-                  <Loader2 className="w-10 h-10 text-white animate-spin" />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full blur-xl opacity-30 animate-pulse"></div>
+
+          {/* Hero Card Skeleton */}
+          <div className="relative bg-white rounded-3xl shadow-2xl p-8 mb-6 overflow-hidden border border-gray-100">
+            <div className="space-y-6">
+              {/* Title */}
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="h-5 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
               </div>
-              <p className="text-gray-600 text-lg font-medium">Analyzing your spending patterns...</p>
+
+              {/* Two columns */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {[1, 2].map((i) => (
+                  <div key={i} className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <div className="h-4 w-24 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%] mb-3"></div>
+                    <div className="h-10 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%] mb-2"></div>
+                    <div className="h-3 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trend indicator */}
+              <div className="flex items-center gap-3 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-5 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  <div className="h-4 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Categories Card Skeleton */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 mb-6 border border-gray-100">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-5 h-5 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-6 w-56 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+
+            <div className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+                      <div className="space-y-2">
+                        <div className="h-5 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                        <div className="h-4 w-40 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                      </div>
+                    </div>
+                    <div className="h-6 w-24 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+                  </div>
+                  <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Smart Insight Card Skeleton */}
+          <div className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-6 w-36 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+            </div>
+            <div className="space-y-3">
+              <div className="h-5 w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
+              <div className="h-5 w-5/6 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]"></div>
             </div>
           </div>
         </div>
@@ -145,13 +203,13 @@ export default function Insights() {
               Insights
             </h1>
           </div>
-          <button
-            onClick={fetchInsights}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-xl font-medium hover:bg-indigo-50 transition-all duration-200 shadow-md hover:shadow-lg border border-indigo-100"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
+<button
+  onClick={fetchInsights}
+  className="group flex items-center gap-2 px-4 mr-[4rem] py-2 bg-white text-indigo-600 rounded-xl font-medium hover:bg-indigo-50 transition-all duration-200 shadow-md hover:shadow-lg border border-indigo-100"
+>
+  <RefreshCw className="w-4 h-4 group-hover:rotate-360 transition-all duration-1000 " />
+</button>
+
         </div>
 
         {/* Month Comparison - Hero Card */}

@@ -5,11 +5,13 @@ import {
   Wallet, 
   Sparkles, 
   Repeat,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from "lucide-react";
 import Income from "../Components/income";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
-import {UserContext } from "../usecontext/usercontext";
+import { UserContext } from "../usecontext/usercontext";
 
 const NAV_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -19,12 +21,13 @@ const NAV_ITEMS = [
   { to: "/subscriptions", icon: Repeat, label: "Subscriptions" },
 ];
 
-const API_URL ="http://localhost:5000";
+const API_URL = "http://localhost:5000";
 
 export default function AppLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [income,setIncome]=useState('');
+  const [income, setIncome] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const userContext = useContext(UserContext);
 
   const fetchUserData = useCallback(async () => {
@@ -80,10 +83,41 @@ export default function AppLayout() {
     [user]
   );
 
+  const closeSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
+
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+      >
+        {isSidebarOpen ? (
+          <X className="w-6 h-6 text-gray-700" />
+        ) : (
+          <Menu className="w-6 h-6 text-gray-700" />
+        )}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 blur-sm backdrop-blur-lg z-30"
+          onClick={closeSidebar}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <aside
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40
+          w-64 bg-white border-r border-gray-200 flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
@@ -97,7 +131,12 @@ export default function AppLayout() {
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to} className={linkClass}>
+            <NavLink
+              key={to}
+              to={to}
+              className={linkClass}
+              onClick={closeSidebar}
+            >
               <Icon className="w-5 h-5" />
               <span>{label}</span>
             </NavLink>
@@ -128,8 +167,8 @@ export default function AppLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        {!income ? <Income setIncomee={setIncome} /> : <Outlet Incomee={income} />}
+      <main className="flex-1 overflow-y-auto w-full">
+        {!income ? <Income setIncomee={setIncome} /> : <Outlet />}
       </main>
     </div>
   );

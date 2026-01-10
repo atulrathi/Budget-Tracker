@@ -9,7 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { Plus, Wallet, TrendingUp, AlertTriangle, CheckCircle, Loader2, RefreshCw } from "lucide-react";
+import { Plus, Wallet, TrendingUp, AlertTriangle, CheckCircle, RefreshCw } from "lucide-react";
 
 /* ============================
    CONSTANTS & CONFIG
@@ -176,33 +176,48 @@ const useBudgetForm = (onSuccess) => {
 };
 
 /* ============================
-   PRESENTATIONAL COMPONENTS
+   SKELETON COMPONENTS
 ============================ */
 const SkeletonCard = () => (
-  <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4 animate-pulse shadow-sm">
+  <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4 shadow-sm">
     <div className="flex justify-between items-start">
       <div className="space-y-2 flex-1">
-        <div className="h-5 bg-gray-200 rounded w-1/3" />
-        <div className="h-3 bg-gray-200 rounded w-1/4" />
+        <div className="h-5 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+        <div className="h-3 w-24 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
       </div>
-      <div className="h-8 w-8 bg-gray-200 rounded-lg" />
+      <div className="h-12 w-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]" />
     </div>
-    <div className="h-3 bg-gray-200 rounded-full w-full" />
-    <div className="h-3 bg-gray-200 rounded w-2/5" />
+    <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-full animate-shimmer bg-[length:200%_100%]" />
+    <div className="flex justify-between items-center">
+      <div className="h-3 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+      <div className="h-6 w-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]" />
+    </div>
   </div>
 );
 
 const SkeletonChart = () => (
-  <div className="bg-white border border-gray-100 rounded-2xl p-8 animate-pulse shadow-sm">
-    <div className="h-6 bg-gray-200 rounded w-1/3 mb-6" />
+  <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="w-10 h-10 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+      <div className="space-y-2 flex-1">
+        <div className="h-5 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+        <div className="h-4 w-56 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+      </div>
+    </div>
     <div className="space-y-6">
       {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-        <div key={i} className="h-12 bg-gray-200 rounded-lg" />
+        <div key={i} className="flex items-center gap-3">
+          <div className="w-24 h-4 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+          <div className="flex-1 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]" />
+        </div>
       ))}
     </div>
   </div>
 );
 
+/* ============================
+   PRESENTATIONAL COMPONENTS
+============================ */
 const EmptyState = ({ icon: Icon, message }) => (
   <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center">
     {Icon && (
@@ -442,24 +457,39 @@ export default function Budgets() {
 
   const hasBudgets = budgets.length > 0;
 
-  // Loading state
+  // Loading state with skeleton
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Wallet className="w-6 h-6 text-white" />
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* HEADER SKELETON */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+              <div className="space-y-2">
+                <div className="h-8 w-32 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg animate-shimmer bg-[length:200%_100%]" />
+                <div className="h-4 w-56 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%]" />
+              </div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Budgets
-            </h1>
+
+            <div className="flex gap-3">
+              <div className="h-10 w-28 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+              <div className="h-10 w-36 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-xl animate-shimmer bg-[length:200%_100%]" />
+            </div>
           </div>
-          <div className="flex items-center justify-center py-32">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600 text-lg font-medium">Loading budgets...</p>
+
+          {/* CONTENT SKELETON */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            {/* BUDGET CARDS SKELETON */}
+            <div className="space-y-4">
+              <div className="h-6 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded animate-shimmer bg-[length:200%_100%] mb-4" />
+              {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
+
+            {/* CHART SKELETON */}
+            <SkeletonChart />
           </div>
         </div>
       </div>
@@ -509,9 +539,9 @@ export default function Budgets() {
           <div className="flex gap-3">
             <button
               onClick={refetch}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all shadow-md hover:shadow-lg border border-blue-100"
+              className="group flex items-center gap-2 px-4 py-2.5 bg-white text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all shadow-md hover:shadow-lg border border-blue-100"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4 group-hover:rotate-360 transition-all duration-1000 " />
               Refresh
             </button>
             <button
@@ -539,11 +569,7 @@ export default function Budgets() {
               )}
             </div>
 
-            {loading ? (
-              Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))
-            ) : hasBudgets ? (
+            {hasBudgets ? (
               budgets.map((b) => <BudgetCard key={b.category} budget={b} />)
             ) : (
               <EmptyState
@@ -554,9 +580,7 @@ export default function Budgets() {
           </div>
 
           {/* CHART */}
-          {loading ? (
-            <SkeletonChart />
-          ) : hasBudgets ? (
+          {hasBudgets ? (
             <BudgetChart data={chartData} />
           ) : (
             <EmptyState 
