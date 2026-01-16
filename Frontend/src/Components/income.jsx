@@ -54,7 +54,7 @@ export default function IncomeEntryForm({setIncomee}) {
       setError(null);
       
       // Simulate API call
-      const incomedata = await fetch('http://localhost:5000/income', {
+      const incomedata = await fetch('https://budget-xi-liart.vercel.app/income', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

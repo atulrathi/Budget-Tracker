@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { to: "/subscriptions", icon: Repeat, label: "Subscriptions" },
 ];
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://budget-xi-liart.vercel.app";
 
 export default function AppLayout() {
   const navigate = useNavigate();

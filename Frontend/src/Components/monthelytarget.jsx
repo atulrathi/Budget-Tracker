@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Target, AlertCircle } from "lucide-react";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://budget-xi-liart.vercel.app";
 
 // Skeleton Loading Component
 function MonthlyPlanSkeleton() {

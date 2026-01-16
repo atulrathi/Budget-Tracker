@@ -78,14 +78,14 @@ export default function ExpenseForm({
     try {
       if (editingExpense) {
         const res = await axios.put(
-          `http://localhost:5000/expenses/${editingExpense._id}`,
+          `https://budget-xi-liart.vercel.app/expenses/${editingExpense._id}`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         updateExpense(res.data);
       } else {
         const res = await axios.post(
-          "http://localhost:5000/expenses",
+          "https://budget-xi-liart.vercel.app/expenses",
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

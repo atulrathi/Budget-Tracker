@@ -12,7 +12,7 @@ function Login() {
           const token = res.credential;
 
           const response = await axios.post(
-            "http://localhost:5000/auth/google",
+            "https://budget-xi-liart.vercel.app/auth/google",
             { token }
           );
 

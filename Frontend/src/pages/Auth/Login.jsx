@@ -23,7 +23,7 @@ const Login = () => {
       setLoading(true);
       setError("");
       
-      const response = await axios.post("http://localhost:5000/auth/login", {
+      const response = await axios.post("https://budget-xi-liart.vercel.app/auth/login", {
         username,
         password,
       });

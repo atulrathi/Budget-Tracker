@@ -38,7 +38,7 @@ const Register = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.post("http://localhost:5000/auth/register", {
+      const response = await axios.post("https://budget-xi-liart.vercel.app/auth/register", {
         fullname,
         username,
         password,

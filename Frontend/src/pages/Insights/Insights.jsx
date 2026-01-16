@@ -17,7 +17,7 @@ export default function Insights() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/insights", {
+      const response = await fetch("https://budget-xi-liart.vercel.app/insights", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -16,7 +16,7 @@ import {
   Clock
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/subscriptions";
+const API_URL = "https://budget-xi-liart.vercel.app/subscriptions";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
