@@ -20,6 +20,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/", (req, res) => {
+res.send("Backend running 🚀");
+});
+
 app.use("/auth",auth);
 app.use("/expenses",Expense);
 app.use("/budgets",Budget);
