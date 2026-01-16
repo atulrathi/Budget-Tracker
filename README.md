@@ -428,10 +428,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Portfolio: [yourwebsite.com](https://yourwebsite.com)
+**Atul Rathi**
+- Email: rathiatul43@gmail.com
+- LinkedIn: [linkedin.com/in/atulrathi18](https://www.linkedin.com/in/atulrathi18)
+- GitHub: [@atulrathi](https://github.com/atulrathi)
 
 ---
 
@@ -447,7 +447,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-For questions or feedback, reach out at: **your.email@example.com**
+For questions or feedback, reach out at: **rathiatul43@gmail.com**
 
 ---
 
