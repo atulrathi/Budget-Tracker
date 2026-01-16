@@ -6,7 +6,8 @@ const UserContextProvider = ({ children }) => {
   const user = {
     name: "",
     income: "",
-    email: ""
+    email: "",
+    Budget:'',
   };
 
   return (

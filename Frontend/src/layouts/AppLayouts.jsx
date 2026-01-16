@@ -1,17 +1,20 @@
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Wallet, 
-  Sparkles, 
+import {
+  LayoutDashboard,
+  Receipt,
+  Wallet,
+  Sparkles,
   Repeat,
   LogOut,
   Menu,
-  X
+  X,
+  DollarSign,
+  PiggyBank,
 } from "lucide-react";
 import Income from "../Components/income";
 import { useEffect, useState, useCallback, useMemo, useContext } from "react";
 import { UserContext } from "../usecontext/usercontext";
+import Budget from "../Components/monthelytarget";
 
 const NAV_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -25,10 +28,14 @@ const API_URL = "http://localhost:5000";
 
 export default function AppLayout() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [income, setIncome] = useState('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const userContext = useContext(UserContext);
+
+  const [user, setUser] = useState(null);
+  const [income, setIncome] = useState("");
+  const [monthlyBudget, setMonthlyBudget] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showIncomeModal, setShowIncomeModal] = useState(false);
+  const [showBudgetModal, setShowBudgetModal] = useState(false);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -42,8 +49,8 @@ export default function AppLayout() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -51,15 +58,18 @@ export default function AppLayout() {
       }
 
       const data = await response.json();
+      console.log("Fetched user data:", data);
       setUser(data.user);
       setIncome(data.user.Income);
+      setMonthlyBudget(data.user.monthlyBudget || "");
       userContext.income = data.user.Income;
+      userContext.Budget = data.user.MonthlyBudget || '';
     } catch (err) {
       console.error("Error fetching user data:", err.message);
       localStorage.removeItem("token");
       navigate("/");
     }
-  }, [navigate]);
+  }, [navigate, userContext]);
 
   useEffect(() => {
     fetchUserData();
@@ -70,21 +80,36 @@ export default function AppLayout() {
     navigate("/");
   }, [navigate]);
 
-  const linkClass = useCallback(({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-      isActive
-        ? "bg-purple-600 text-white"
-        : "text-gray-700 hover:bg-gray-100"
-    }`, []
+  const linkClass = useCallback(
+    ({ isActive }) =>
+      `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+        isActive
+          ? "bg-purple-600 text-white"
+          : "text-gray-700 hover:bg-gray-100"
+      }`,
+    []
   );
 
-  const userInitial = useMemo(() => 
-    user?.name ? user.name.charAt(0).toUpperCase() : "U",
+  const userInitial = useMemo(
+    () => (user?.name ? user.name.charAt(0).toUpperCase() : "U"),
     [user]
   );
 
   const closeSidebar = useCallback(() => {
     setIsSidebarOpen(false);
+    setIncome(userContext.income);
+    setShowBudgetModal(false);
+  }, []);
+
+  const toggleIncomeModal = useCallback(() => {
+    setIsSidebarOpen(false);
+    setShowBudgetModal(false);
+    setIncome('')
+  }, []);
+
+  const toggleBudgetModal = useCallback(() => {
+    setIsSidebarOpen(false);
+    setShowBudgetModal(true);
   }, []);
 
   return (
@@ -93,6 +118,7 @@ export default function AppLayout() {
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+        aria-label="Toggle menu"
       >
         {isSidebarOpen ? (
           <X className="w-6 h-6 text-gray-700" />
@@ -104,7 +130,7 @@ export default function AppLayout() {
       {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 blur-sm backdrop-blur-lg z-30"
+          className="lg:hidden fixed inset-0 backdrop-blur-lg bg-opacity-50 z-30"
           onClick={closeSidebar}
         />
       )}
@@ -115,7 +141,11 @@ export default function AppLayout() {
           fixed lg:static inset-y-0 left-0 z-40
           w-64 bg-white border-r border-gray-200 flex flex-col
           transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
         `}
       >
         {/* Logo */}
@@ -129,7 +159,7 @@ export default function AppLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
@@ -141,6 +171,27 @@ export default function AppLayout() {
               <span>{label}</span>
             </NavLink>
           ))}
+
+          {/* Budget & Income Management Buttons */}
+          <div className="pt-4 mt-4 border-t border-gray-200 space-y-2">
+            <button
+              onClick={toggleIncomeModal}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-green-700 hover:bg-green-50 transition-all"
+            >
+              <DollarSign className="w-5 h-5" />
+              <span>{income ? "Update Income" : "Add Income"}</span>
+            </button>
+
+            <button
+              onClick={toggleBudgetModal}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-blue-700 hover:bg-blue-50 transition-all"
+            >
+              <PiggyBank className="w-5 h-5" />
+              <span>
+                {monthlyBudget ? "Update Monthly Target" : "Monthly Target"}
+              </span>
+            </button>
+          </div>
         </nav>
 
         {/* Profile Section */}
@@ -155,7 +206,7 @@ export default function AppLayout() {
               </p>
             </div>
           </div>
-          
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-red-600 text-sm font-medium"
@@ -168,7 +219,7 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto w-full">
-        {!income ? <Income setIncomee={setIncome} /> : <Outlet />}
+        {!showBudgetModal ? ( !income ?  <Income/>  : <Outlet />):<Budget /> }
       </main>
     </div>
   );

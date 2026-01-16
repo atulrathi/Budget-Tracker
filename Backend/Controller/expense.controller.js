@@ -67,7 +67,7 @@ const endOfMonth = new Date(
     // 1. Calculate totals
     const totalSpending = filterexpense.reduce((sum, e) => sum + e.amount, 0);
     const income = userdata.Income;
-    const budget = 50000;
+    const budget = userdata.MonthlyBudget;
     const savings = income - totalSpending;
     
     // 2. Calculate percentages

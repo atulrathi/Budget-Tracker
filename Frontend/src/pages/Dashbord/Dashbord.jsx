@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useContext } from "react";
 import {UserContext} from "../../usecontext/usercontext";
+import Userbudget from "../../Components/monthelytarget";
 
 const COLORS = ["#6366F1", "#10B981", "#EF4444", "#8B5CF6", "#F59E0B", "#06B6D4", "#EC4899"];
 
@@ -218,7 +219,7 @@ export default function Dashboard() {
 
 {/* CHARTS ROW 1 */}
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartBox
+          {userContext.Budget?<ChartBox
             title="Budget Utilization"
             subtitle="Planned vs actual spending"
             icon={<BarChart3 className="w-5 h-5" />}
@@ -251,7 +252,7 @@ export default function Dashboard() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </ChartBox>
+          </ChartBox>:<Userbudget />}
 
   <ChartBox title="Category Breakdown" subtitle="Spending by category" icon={<Activity className="w-5 h-5" />}>
     <div className="overflow-visible">

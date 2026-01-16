@@ -10,14 +10,14 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       unique: true,
-      sparse: true,   // ✅ allows null
+      sparse: true,
       trim: true,
     },
 
     email: {
       type: String,
       unique: true,
-      sparse: true,   // ✅ allows null
+      sparse: true,   
       lowercase: true,
       trim: true,
     },
@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       unique: true,
       sparse: true,
     },Income:{
+      type: Number,
+      default: 0,
+    },
+    MonthlyBudget: {
       type: Number,
       default: 0,
     },

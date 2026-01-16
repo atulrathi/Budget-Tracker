@@ -371,8 +371,7 @@ export default function Subscriptions() {
 
         {/* ADD/EDIT FORM */}
         {showForm && (
-          <div ref={targetref} className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div ref={targetref} className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-8">            <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingSubscription ? 'Edit Subscription' : 'Add New Subscription'}
               </h2>

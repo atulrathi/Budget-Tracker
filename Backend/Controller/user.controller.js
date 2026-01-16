@@ -19,4 +19,4 @@ exports.usercontroller = async (req, res) => {
         console.error("Error fetching user data:", error);
         return res.status(500).json({message:"Internal Server Error"});
     }
-}
+};
