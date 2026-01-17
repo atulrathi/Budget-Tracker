@@ -17,8 +17,6 @@ exports.updateIncome = async (req, res) => {
         if(!userdata){
             return res.status(404).json({ message: "User not found."});
         };
-
-        console.log("Income updated successfully for user:", userdata);
         return res.status(200).json({ message: "Income updated successfully.", user: userdata.Income});
 
     }catch (err){ 

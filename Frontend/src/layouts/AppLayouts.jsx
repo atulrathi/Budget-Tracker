@@ -58,7 +58,6 @@ export default function AppLayout() {
       }
 
       const data = await response.json();
-      console.log("Fetched user data:", data);
       setUser(data.user);
       setIncome(data.user.Income);
       setMonthlyBudget(data.user.monthlyBudget || "");
@@ -219,7 +218,7 @@ export default function AppLayout() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto w-full">
-        {!showBudgetModal ? ( !income ?  <Income/>  : <Outlet />):<Budget /> }
+        {!showBudgetModal ? ( !income ?  <Income setIncomee={setIncome}/>  : <Outlet />):<Budget /> }
       </main>
     </div>
   );

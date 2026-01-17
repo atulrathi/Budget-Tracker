@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, AlertCircle, RefreshCw, Sparkles, PieChart, Calendar } from "lucide-react";
-
+const api = "http://localhost:5000";
 export default function Insights() {
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ export default function Insights() {
 
       const token = localStorage.getItem("token");
 
-      const response = await fetch("https://budget-tracker-s0vs.onrender.com/insights", {
+      const response = await fetch(`${api}/insights`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

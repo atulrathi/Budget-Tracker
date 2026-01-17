@@ -11,7 +11,7 @@ const formatCurrency = (value) => {
     }
   };import { useState, useEffect } from 'react';
 import { DollarSign, Briefcase, TrendingUp, CheckCircle, Wallet, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-
+const api = "http://localhost:5000";
 export default function IncomeEntryForm({setIncomee}) {
   const [income, setIncome] = useState('');
   const [source, setSource] = useState('');
@@ -28,6 +28,7 @@ export default function IncomeEntryForm({setIncomee}) {
         setError(null);
 
         await new Promise(resolve => setTimeout(resolve, 1500));
+        
         
       } catch (err) {
         setError('Failed to load income data. Please try again.');
@@ -48,7 +49,7 @@ export default function IncomeEntryForm({setIncomee}) {
       setError(null);
       
       // Simulate API call
-      const incomedata = await fetch('https://budget-tracker-s0vs.onrender.com/income', {
+      const incomedata = await fetch(`${api}/income`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -60,6 +61,7 @@ export default function IncomeEntryForm({setIncomee}) {
       const result = await incomedata.json();
       setSubmitted(true);
       setTimeout(() => setSubmitted(false), 1000);
+      console.log('Income saved:', result);
       setTimeout(() => setIncomee(result.user), 1500);
       
     } catch (err) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -28,6 +28,7 @@ import {
 import { useContext } from "react";
 import {UserContext} from "../../usecontext/usercontext";
 import Userbudget from "../../Components/monthelytarget";
+const api = "http://localhost:5000";
 
 const COLORS = ["#6366F1", "#10B981", "#EF4444", "#8B5CF6", "#F59E0B", "#06B6D4", "#EC4899"];
 
@@ -48,7 +49,7 @@ export default function Dashboard() {
         throw new Error("Authentication required. Please log in.");
       }
 
-      const response = await fetch("https://budget-tracker-s0vs.onrender.com/expenses", {
+      const response = await fetch(`${api}/expenses`, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -73,6 +74,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchDashboard();
   }, []);
+
+  const setBudget = useCallback((data)=>{
+    setDashboardData(data.dashboard)
+  },[fetchDashboard]);
 
   // Loading State with Skeleton
   if (loading) {
@@ -252,7 +257,7 @@ export default function Dashboard() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </ChartBox>:<Userbudget />}
+          </ChartBox>:<Userbudget setBudget={setBudget} />}
 
   <ChartBox title="Category Breakdown" subtitle="Spending by category" icon={<Activity className="w-5 h-5" />}>
     <div className="overflow-visible">

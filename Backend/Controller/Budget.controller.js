@@ -14,13 +14,13 @@ exports.createBudget = async (req, res) => {
       });
     }
 
-    // 🔥 Normalize category
+  
     category = category.toLowerCase().trim();
 
-    // 🔥 Current month
+   
     const month = getCurrentMonth();
 
-    // 🔥 Prevent duplicate budget PER MONTH
+    
     const existingBudget = await Budget.findOne({
       userId,
       category,
