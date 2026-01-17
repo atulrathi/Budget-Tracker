@@ -11,7 +11,7 @@ const formatCurrency = (value) => {
     }
   };import { useState, useEffect } from 'react';
 import { DollarSign, Briefcase, TrendingUp, CheckCircle, Wallet, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-const api = "https://budget-tracker-ruby.vercel.app";
+const api = "https://budget-tracker-s0vs.onrender.com";
 export default function IncomeEntryForm({setIncomee}) {
   const [income, setIncome] = useState('');
   const [source, setSource] = useState('');
