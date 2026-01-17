@@ -24,7 +24,7 @@ const NAV_ITEMS = [
   { to: "/subscriptions", icon: Repeat, label: "Subscriptions" },
 ];
 
-const API_URL = "https://budget-xi-liart.vercel.app";
+const API_URL = "https://budget-tracker-s0vs.onrender.com";
 
 export default function AppLayout() {
   const navigate = useNavigate();

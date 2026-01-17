@@ -12,7 +12,7 @@ function Login() {
           const token = res.credential;
 
           const response = await axios.post(
-            "https://budget-xi-liart.vercel.app/auth/google",
+            "https://budget-tracker-s0vs.onrender.com/auth/google",
             { token }
           );
 

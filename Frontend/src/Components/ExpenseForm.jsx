@@ -78,14 +78,14 @@ export default function ExpenseForm({
     try {
       if (editingExpense) {
         const res = await axios.put(
-          `https://budget-xi-liart.vercel.app/expenses/${editingExpense._id}`,
+          `https://budget-tracker-s0vs.onrender.com/expenses/${editingExpense._id}`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         updateExpense(res.data);
       } else {
         const res = await axios.post(
-          "https://budget-xi-liart.vercel.app/expenses",
+          "https://budget-tracker-s0vs.onrender.com/expenses",
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

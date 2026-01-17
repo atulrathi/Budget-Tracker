@@ -14,7 +14,7 @@ import { Plus, Wallet, TrendingUp, AlertTriangle, CheckCircle, RefreshCw } from 
 /* ============================
    CONSTANTS & CONFIG
 ============================ */
-const API_URL = "https://budget-xi-liart.vercel.app/budgets";
+const API_URL = "https://budget-tracker-s0vs.onrender.com/budgets";
 const SKELETON_COUNT = 4;
 const ANIMATION_DURATION = 300;
 

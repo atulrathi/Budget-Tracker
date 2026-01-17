@@ -26,14 +26,8 @@ export default function IncomeEntryForm({setIncomee}) {
       try {
         setLoading(true);
         setError(null);
-        // Simulate API call
+
         await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Simulate loaded data (you can replace this with actual API call)
-        // const response = await fetch('/api/income');
-        // const data = await response.json();
-        // setIncome(data.amount || '');
-        // setSource(data.source || '');
         
       } catch (err) {
         setError('Failed to load income data. Please try again.');
@@ -54,7 +48,7 @@ export default function IncomeEntryForm({setIncomee}) {
       setError(null);
       
       // Simulate API call
-      const incomedata = await fetch('https://budget-xi-liart.vercel.app/income', {
+      const incomedata = await fetch('https://budget-tracker-s0vs.onrender.com/income', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

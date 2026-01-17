@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Target, AlertCircle } from "lucide-react";
 
-const API_URL = "https://budget-xi-liart.vercel.app";
+const API_URL = "https://budget-tracker-s0vs.onrender.com";
 
 // Skeleton Loading Component
 function MonthlyPlanSkeleton() {

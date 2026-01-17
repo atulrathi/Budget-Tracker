@@ -23,7 +23,7 @@ const Login = () => {
       setLoading(true);
       setError("");
       
-      const response = await axios.post("https://budget-xi-liart.vercel.app/auth/login", {
+      const response = await axios.post("https://budget-tracker-s0vs.onrender.com/auth/login", {
         username,
         password,
       });

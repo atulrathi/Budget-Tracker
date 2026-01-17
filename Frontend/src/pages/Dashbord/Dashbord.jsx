@@ -48,7 +48,7 @@ export default function Dashboard() {
         throw new Error("Authentication required. Please log in.");
       }
 
-      const response = await fetch("https://budget-xi-liart.vercel.app/expenses", {
+      const response = await fetch("https://budget-tracker-s0vs.onrender.com/expenses", {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",

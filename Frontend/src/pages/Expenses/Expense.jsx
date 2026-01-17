@@ -13,7 +13,7 @@ import ExpenseList from "../../Components/ExpenseList";
 import ExpenseCategoryBarChart from "../../Components/ExpenseCategoryChart";
 
 const LIST_LIMIT = 6;
-const API_BASE_URL = "https://budget-xi-liart.vercel.app";
+const API_BASE_URL = "https://budget-tracker-s0vs.onrender.com";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,

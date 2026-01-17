@@ -38,7 +38,7 @@ const Register = () => {
       setLoading(true);
       setError("");
 
-      const response = await axios.post("https://budget-xi-liart.vercel.app/auth/register", {
+      const response = await axios.post("https://budget-tracker-s0vs.onrender.com/auth/register", {
         fullname,
         username,
         password,

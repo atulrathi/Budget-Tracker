@@ -16,7 +16,7 @@ import {
   Clock
 } from "lucide-react";
 
-const API_URL = "https://budget-xi-liart.vercel.app/subscriptions";
+const API_URL = "https://budget-tracker-s0vs.onrender.com/subscriptions";
 
 const getAuthHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem("token")}`,
