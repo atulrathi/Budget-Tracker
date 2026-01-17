@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Sparkles, Lock, User, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 import GoogleLoginbutton from "../../Components/GoogleloginButton";
-const api = "http://localhost:5000";
+const api = "https://budget-tracker-ruby.vercel.app";
 
 const Login = () => {
   const [username, setUsername] = useState("");

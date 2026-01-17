@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, AlertCircle, RefreshCw, Sparkles, PieChart, Calendar } from "lucide-react";
-const api = "http://localhost:5000";
+const api = "https://budget-tracker-ruby.vercel.app";
 export default function Insights() {
   const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);

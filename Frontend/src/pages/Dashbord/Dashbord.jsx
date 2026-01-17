@@ -28,7 +28,7 @@ import {
 import { useContext } from "react";
 import {UserContext} from "../../usecontext/usercontext";
 import Userbudget from "../../Components/monthelytarget";
-const api = "http://localhost:5000";
+const api = "https://budget-tracker-ruby.vercel.app";
 
 const COLORS = ["#6366F1", "#10B981", "#EF4444", "#8B5CF6", "#F59E0B", "#06B6D4", "#EC4899"];
 
