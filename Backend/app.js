@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-res.send(`running ${process.env.PORT}mongo ${process.env.MONGO_URI} google ${process.env.GOOGLE_CLIENT_ID}`);
+res.send("Backend running 🚀");
 });
 
 app.use("/auth",auth);
