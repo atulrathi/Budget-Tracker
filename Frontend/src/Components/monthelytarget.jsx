@@ -140,9 +140,6 @@ const handleSubmit = async (e) => {
   }
 };
 
-
-
-
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
     setError('');

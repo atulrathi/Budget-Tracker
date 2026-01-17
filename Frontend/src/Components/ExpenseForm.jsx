@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { AlertCircle, FileText, X } from "lucide-react";
-const api = "https://budget-tracker-ruby.vercel.app";
+const api = "https://budget-tracker-s0vs.onrender.com";
 
 const CATEGORIES = [
   "Rent / Housing",
