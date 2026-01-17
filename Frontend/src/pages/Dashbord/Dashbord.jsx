@@ -257,7 +257,7 @@ export default function Dashboard() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </ChartBox>:<Userbudget setBudget={setBudget} />}
+          </ChartBox>:<Userbudget budget={setBudget} />}
 
   <ChartBox title="Category Breakdown" subtitle="Spending by category" icon={<Activity className="w-5 h-5" />}>
     <div className="overflow-visible">
