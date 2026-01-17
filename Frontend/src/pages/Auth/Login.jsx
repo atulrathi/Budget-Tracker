@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Sparkles, Lock, User, ArrowRight, AlertCircle, Eye, EyeOff } from "lucide-react";
 import GoogleLoginbutton from "../../Components/GoogleloginButton";
+const api = "http://localhost:5000";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -23,7 +24,7 @@ const Login = () => {
       setLoading(true);
       setError("");
       
-      const response = await axios.post("http://localhost:5000/auth/login", {
+      const response = await axios.post(`${api}/auth/login`, {
         username,
         password,
       });

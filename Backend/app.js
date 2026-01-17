@@ -12,7 +12,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://budget-tracker-ruby.vercel.app",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH "],
   })
 );

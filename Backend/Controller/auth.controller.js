@@ -54,8 +54,6 @@ exports.register = async (req, res) => {
   try {
     const { fullname, username, password } = req.body;
 
-    console.log(fullname,username,password);
-
     // 1️⃣ Check if user already exists
     const existingUser = await User.findOne({ username });
 

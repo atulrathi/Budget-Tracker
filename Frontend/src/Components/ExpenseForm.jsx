@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { AlertCircle, FileText, X } from "lucide-react";
+const api = "http://localhost:5000";
 
 const CATEGORIES = [
   "Rent / Housing",
@@ -78,14 +79,14 @@ export default function ExpenseForm({
     try {
       if (editingExpense) {
         const res = await axios.put(
-          `http://localhost:5000/expenses/${editingExpense._id}`,
+          `${api}/expenses/${editingExpense._id}`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         updateExpense(res.data);
       } else {
         const res = await axios.post(
-          "http://localhost:5000/expenses",
+          `${api}/expenses`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

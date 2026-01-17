@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Target, AlertCircle } from "lucide-react";
+import {UserContext} from "../usecontext/usercontext"
 
 const API_URL = "http://localhost:5000";
 
@@ -31,13 +32,14 @@ function MonthlyPlanSkeleton() {
   );
 }
 
-export default function MonthlyPlan() {
+export default function MonthlyPlan({setBudget}) {
   const [currentPlan, setCurrentPlan] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const usercontext = useContext(UserContext);
 
   // Fetch current monthly plan
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function MonthlyPlan() {
           setInitialLoading(false);
           return;
         }
-
+        
         const response = await fetch(`${API_URL}/user`, {
           method: "GET",
           headers: {
@@ -76,51 +78,66 @@ export default function MonthlyPlan() {
     fetchMonthlyPlan();
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!amount || amount <= 0) {
-      setError('Please enter a valid amount greater than zero');
-      return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Validation
+  if (!amount || amount <= 0) {
+    setError("Please enter a valid amount greater than zero");
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+  setSuccess(false);
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // 1️⃣ Update Budget FIRST
+    const budgetRes = await fetch(`${API_URL}/income/budget`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ budget: amount }),
+    });
+
+    if (!budgetRes.ok) {
+      throw new Error("Unable to update monthly plan");
     }
 
-    setLoading(true);
-    setError('');
-    setSuccess(false);
+    await budgetRes.json();
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/income/budget`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ budget: amount })
-      });
+    const expensesRes = await fetch(`${API_URL}/expenses`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error('Unable to update monthly plan');
-      }
-
-      await response.json();
-      setCurrentPlan(amount);
-      setSuccess(true);
-      
-      // Dispatch event for other components
-      window.dispatchEvent(new CustomEvent('monthlyPlanUpdated', { 
-        detail: { monthlyPlan: amount } 
-      }));
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      setError(err.message || 'An error occurred while updating your monthly plan');
-    } finally {
-      setLoading(false);
+    if (!expensesRes.ok) {
+      throw new Error("Unable to fetch updated expenses");
     }
-  };
+
+    const expensesData = await expensesRes.json();
+
+    // ✅ Update UI
+    setBudget(expensesData);
+    setCurrentPlan(amount);
+    setSuccess(true);
+    usercontext.Budget = amount;
+
+    setTimeout(() => setSuccess(false), 3000);
+  } catch (err) {
+    setError(err.message || "An error occurred while updating your monthly plan");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const handleAmountChange = (e) => {
     setAmount(e.target.value);
