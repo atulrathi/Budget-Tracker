@@ -32,7 +32,7 @@ function MonthlyPlanSkeleton() {
   );
 }
 
-export default function MonthlyPlan({setBudget}) {
+export default function MonthlyPlan({budget}) {
   const [currentPlan, setCurrentPlan] = useState('');
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
@@ -123,8 +123,11 @@ const handleSubmit = async (e) => {
 
     const expensesData = await expensesRes.json();
 
-    // ✅ Update UI
-    setBudget(expensesData);
+    // ✅ SAFE CALLBACK CALL
+    if (typeof budget === "function") {
+      budget(expensesData);
+    }
+
     setCurrentPlan(amount);
     setSuccess(true);
     usercontext.Budget = amount;
@@ -136,6 +139,7 @@ const handleSubmit = async (e) => {
     setLoading(false);
   }
 };
+
 
 
 
